@@ -1,5 +1,5 @@
 {
-  "description": "Record the session in Sovara; requires `sovara-claude-code` on PATH (pip or npm).",
+  "description": "Record the session in Sovara; requires `sovara-claude-code` on PATH (uv tool install, pip, or npm).",
   "hooks": {
     "SessionStart": [
       {

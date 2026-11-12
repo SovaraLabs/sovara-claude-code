@@ -1,11 +1,13 @@
 # sovara-claude-code
 
-The Python hook program for [Sovara for Claude Code](https://github.com/SovaraLabs/sovara-claude-code#readme):
-`pip install sovara-claude-code`, then load the `sovara-recording` plugin.
+The Python hook program for [Sovara for Claude Code](https://github.com/SovaraLabs/sovara-claude-code#readme).
 
-## Development
+```sh
+uv tool install sovara-claude-code
+# or: pip install sovara-claude-code
+```
 
-See [Development](https://github.com/SovaraLabs/sovara-claude-code#development).
+Then load the `sovara-recording` plugin.
 
 ## License
 
