@@ -12,6 +12,7 @@ Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
 
    ```sh
    uv tool install sovara-claude-code    # Python 3.10+
+   # or: pip install sovara-claude-code
    npm install -g @sovara/claude-code    # or Node.js 24.22.1+
    ```
 
