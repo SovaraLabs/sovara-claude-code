@@ -15,8 +15,8 @@ Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
    npm install -g @sovara/claude-code    # or Node.js 24.22.1+
    ```
 
-2. Sign in with `sovara login --url <your Sovara URL>`, or set `SOVARA_EXEC_SERVER_URL` and
-   `SOVARA_AGENT_TOKEN`.
+2. [Install the Sovara CLI](https://docs.sovara-labs.com/get-started/installation) and sign in
+   with `sovara login --url <your Sovara URL>`.
 3. Load the `sovara-recording` plugin from [`plugin/`](plugin), for example
    `claude --plugin-dir plugin` from a clone of this repository. Its hooks run `sovara-claude-code hook`.
 
