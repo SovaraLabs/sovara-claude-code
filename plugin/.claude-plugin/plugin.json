@@ -1,0 +1,11 @@
+{
+  "name": "sovara-recording",
+  "version": "0.1.0",
+  "description": "Record Claude Code sessions in Sovara and add relevant lessons to each prompt",
+  "author": {
+    "name": "Sovara Labs Inc.",
+    "url": "https://sovara-labs.com"
+  },
+  "homepage": "https://github.com/SovaraLabs/sovara-claude-code",
+  "license": "MIT"
+}

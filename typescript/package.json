@@ -1,0 +1,41 @@
+{
+  "name": "@sovara/claude-code",
+  "version": "0.1.0",
+  "description": "Record Claude Code sessions in Sovara and add relevant lessons to each prompt",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SovaraLabs/sovara-claude-code.git",
+    "directory": "typescript"
+  },
+  "homepage": "https://github.com/SovaraLabs/sovara-claude-code#readme",
+  "keywords": ["sovara", "claude-code", "observability"],
+  "bin": {
+    "sovara-claude-code": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@sovara/sdk": "file:../../sovara/packages/typescript-sdk"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.1"
+  }
+}

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sovara-claude-code"
+version = "0.1.0"
+description = "Record Claude Code sessions in Sovara and add relevant lessons to each prompt"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = ["sovara"]
+
+[project.scripts]
+sovara-claude-code = "sovara_claude_code.__main__:main"
+
+[project.urls]
+Documentation = "https://docs.sovara-labs.com/sdks/integrations"
+Repository = "https://github.com/SovaraLabs/sovara-claude-code/tree/main/python"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sovara_claude_code*"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff==0.17.2",
+    "httpx",
+]
+
+[tool.uv.sources]
+# Development uses a sovara checkout next to this repository.
+sovara = { path = "../../sovara/packages/python-sdk", editable = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E4", "E7", "E9", "F", "I", "UP", "B",
+    "D100", "D101", "D102", "D103", "D104", "D106", "D107",
+    "D200", "D205", "D400", "D401", "D419",
+    "ERA001", "PGH004", "RUF100",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D1"]
+
+[tool.ruff.lint.isort]
+# Sovara's own packages sort together, as in the sovara repository.
+known-first-party = ["sovara", "sovara_common", "sovara_claude_code", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
