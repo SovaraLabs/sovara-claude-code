@@ -11,8 +11,8 @@ Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
 1. Install the hook program with either runtime:
 
    ```sh
-   pip install sovara-claude-code         # Python 3.10+
-   npm install -g @sovara/claude-code     # or Node.js 24.22.1+
+   uv tool install sovara-claude-code    # Python 3.10+
+   npm install -g @sovara/claude-code    # or Node.js 24.22.1+
    ```
 
 2. Sign in with `sovara login --url <your Sovara URL>`, or set `SOVARA_EXEC_SERVER_URL` and
