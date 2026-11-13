@@ -18,8 +18,14 @@ Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
 
 2. [Install the Sovara CLI](https://docs.sovara-labs.com/get-started/installation) and sign in
    with `sovara login --url <your Sovara URL>`.
-3. Load the `sovara-recording` plugin from [`plugin/`](plugin), for example
-   `claude --plugin-dir plugin` from a clone of this repository. Its hooks run `sovara-claude-code hook`.
+3. In Claude Code, add the marketplace and install the plugin:
+
+   ```text
+   /plugin marketplace add SovaraLabs/sovara-claude-code
+   /plugin install sovara-recording@sovara-claude-code
+   ```
+
+   Restart Claude Code to activate the hooks.
 
 The project is the folder you start Claude Code in; set `SOVARA_PROJECT` to choose another.
 

@@ -31,7 +31,7 @@
     "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
-    "@sovara/sdk": "file:../../sovara/packages/typescript-sdk"
+    "@sovara/sdk": "^0.10.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
