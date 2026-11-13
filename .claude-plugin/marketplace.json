@@ -1,0 +1,17 @@
+{
+  "name": "sovara-claude-code",
+  "owner": {
+    "name": "Sovara Labs"
+  },
+  "plugins": [
+    {
+      "name": "sovara-recording",
+      "source": "./plugin",
+      "description": "Record Claude Code sessions in Sovara and add relevant lessons to each prompt",
+      "version": "0.1.0"
+    }
+  ],
+  "metadata": {
+    "description": "Sovara recording and lessons for Claude Code"
+  }
+}

@@ -9,13 +9,13 @@ description = "Record Claude Code sessions in Sovara and add relevant lessons to
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
-dependencies = ["sovara"]
+dependencies = ["sovara>=0.10,<0.11"]
 
 [project.scripts]
 sovara-claude-code = "sovara_claude_code.__main__:main"
 
 [project.urls]
-Documentation = "https://docs.sovara-labs.com/sdks/integrations"
+Documentation = "https://docs.sovara-labs.com/integrations/claude-code"
 Repository = "https://github.com/SovaraLabs/sovara-claude-code/tree/main/python"
 
 [tool.setuptools]
@@ -31,10 +31,6 @@ dev = [
     "ruff==0.17.2",
     "httpx",
 ]
-
-[tool.uv.sources]
-# Development uses a sovara checkout next to this repository.
-sovara = { path = "../../sovara/packages/python-sdk", editable = true }
 
 [tool.ruff]
 line-length = 100
