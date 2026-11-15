@@ -1,14 +1,15 @@
 # Sovara for Claude Code
 
-Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
+Sovara helps teams manage domain knowledge and put it to work in AI agents.
+Capture business rules, expert guidance, and lessons from experience in a shared
+knowledge base. Deliver relevant knowledge to agents as they work, review how
+they use it, and improve it together.
 
-- Each session is a Sovara trace, each prompt a turn.
-- Tool calls (succeeded or failed) are tool steps; Claude's reply is a model step.
-- Matching lessons are added to the prompt as extra context.
+Bring your team's domain knowledge into Claude Code and review agent sessions together with Sovara.
 
 ## Setup
 
-1. Install the hook program with either runtime:
+1. Install the integration with either runtime:
 
    ```sh
    uv tool install sovara-claude-code    # Python 3.10+
@@ -29,12 +30,16 @@ Record Claude Code sessions in Sovara and add relevant lessons to each prompt.
 
 The project is the folder you start Claude Code in; set `SOVARA_PROJECT` to choose another.
 
-## Behavior
+## Using your team's knowledge
 
-- Hooks never block Claude Code. If Sovara is unavailable, the session runs unrecorded.
+Store business rules and expert guidance as lessons in Sovara, including when
+they should apply. Relevant lessons are added to your prompts; recorded sessions
+let your team review how they were used.
+
+If Sovara is unavailable, Claude Code continues running.
 
 Packages: [`python/`](python) (`sovara-claude-code`) and [`typescript/`](typescript)
-(`@sovara/claude-code`). Both read and write the same state, so either works.
+(`@sovara/claude-code`). Choose either runtime.
 
 ## License
 

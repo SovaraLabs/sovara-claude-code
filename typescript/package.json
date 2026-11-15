@@ -1,7 +1,7 @@
 {
   "name": "@sovara/claude-code",
-  "version": "0.1.1",
-  "description": "Record Claude Code sessions in Sovara and add relevant lessons to each prompt",
+  "version": "0.1.2",
+  "description": "Bring your team's domain knowledge into Claude Code and review agent sessions together with Sovara.",
   "type": "module",
   "license": "MIT",
   "repository": {
