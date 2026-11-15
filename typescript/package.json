@@ -1,6 +1,6 @@
 {
   "name": "@sovara/claude-code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Record Claude Code sessions in Sovara and add relevant lessons to each prompt",
   "type": "module",
   "license": "MIT",
@@ -31,7 +31,7 @@
     "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
-    "@sovara/sdk": "^0.10.0"
+    "@sovara/sdk": ">=0.10.0 <0.12.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
