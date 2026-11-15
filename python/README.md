@@ -1,13 +1,18 @@
 # sovara-claude-code
 
-The Python hook program for [Sovara for Claude Code](https://github.com/SovaraLabs/sovara-claude-code#readme).
+Sovara helps teams manage domain knowledge and put it to work in AI agents.
+Capture business rules, expert guidance, and lessons from experience in a shared
+knowledge base. Deliver relevant knowledge to agents as they work, review how
+they use it, and improve it together.
+
+Bring your team's domain knowledge into Claude Code and review agent sessions together with Sovara. This package uses Python.
 
 ```sh
 uv tool install sovara-claude-code
-# or: pip install sovara-claude-code
 ```
 
-Then load the `sovara-recording` plugin.
+Follow the [setup guide](https://github.com/SovaraLabs/sovara-claude-code#setup)
+to connect Sovara and enable the Claude Code plugin.
 
 ## License
 
