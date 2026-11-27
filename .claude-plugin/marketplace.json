@@ -8,7 +8,7 @@
       "name": "sovara-recording",
       "source": "./plugin",
       "description": "Bring your team's domain knowledge into Claude Code and review agent sessions together with Sovara.",
-      "version": "0.1.1"
+      "version": "0.2.0"
     }
   ],
   "metadata": {

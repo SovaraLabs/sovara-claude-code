@@ -421,7 +421,7 @@ wheels = [
 
 [[package]]
 name = "sovara-claude-code"
-version = "0.1.2"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "sovara" },
@@ -435,7 +435,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "sovara", specifier = ">=0.10,<0.12" }]
+requires-dist = [{ name = "sovara", specifier = ">=0.10,<0.13" }]
 
 [package.metadata.requires-dev]
 dev = [
