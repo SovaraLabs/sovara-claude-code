@@ -1,8 +1,8 @@
 """Per-session state shared by the hook processes of one Claude Code session.
 
-Each session has one JSON file holding its recording handles, which carry a write token: the
-file is private (0600), written atomically, and never logged. The format is shared with the
-TypeScript integration (``@sovara/claude-code``).
+Each session has one JSON file holding its recording handles, which carry a write token, and the
+current turn's prompt and lessons: the file is private (0600), written atomically, and never
+logged. The format is shared with the TypeScript integration (``@sovara/claude-code``).
 """
 
 from __future__ import annotations

@@ -77,17 +77,23 @@ describe("Claude Code hooks", () => {
     await run("PostToolUse", { tool_name: "Bash", tool_input: { command: "make" }, tool_response: { stdout: "ok" }, tool_use_id: "t1" });
     await run("PostToolUseFailure", { tool_name: "Bash", tool_input: { command: "x" }, error: "Exit code 1", tool_use_id: "t2" });
     await run("Stop", { last_assistant_message: "Fixed it." });
+    await run("Stop", { last_assistant_message: "Also done." });
     await run("SessionEnd", { reason: "other" });
 
     expect(JSON.parse(output!).hookSpecificOutput.additionalContext).toBe("Run the tests first.");
     expect(server.paths()).toEqual([
-      "/exec/traces", "/turns", "/lesson-retrievals", "/steps/record", "/steps/record", "/steps/record", "/complete",
+      "/exec/traces", "/turns", "/lesson-retrievals", "/steps/record", "/steps/record", "/steps/record", "/steps/record", "/complete",
     ]);
     expect([server.requests[0].body.project_name, server.requests[0].body.trace_id]).toEqual(["my-repo", "claude-code:s1"]);
-    const [tool, failed, reply] = server.requests.filter((r) => r.path.endsWith("/record")).map((r) => r.body);
+    const [tool, failed, reply, later] = server.requests.filter((r) => r.path.endsWith("/record")).map((r) => r.body);
     expect([tool.call.value.name, tool.turn_id]).toEqual(["Bash", "turn-1"]);
     expect(failed.outcome.value.status).toBe("error");
     expect(reply.outcome.value.output.message.content[0].text).toBe("Fixed it.");
+    expect(reply.execution.value.injected_retrieval_id).toBe("r1");
+    expect(reply.execution.value.input.messages.map((m: any) => m.content[0].text))
+      .toEqual(["Fix the build", "Run the tests first."]);
+    // A retrieval belongs to one step; a later reply in the same turn records none.
+    expect(later.execution ?? null).toBeNull();
     expect(readdirSync(dir).filter((n) => n.endsWith(".json"))).toEqual([]);
     expect(JSON.stringify(errors.mock.calls)).not.toContain(TOKEN);
   });
@@ -118,6 +124,7 @@ describe("Claude Code hooks", () => {
   it("starts the turn even when lesson retrieval fails", async () => {
     const server = fakeServer();
     await handle(event("SessionStart", { source: "startup" }), { fetch: server.fetch });
+    await handle(event("UserPromptSubmit", { prompt: "first" }), { fetch: server.fetch });
     server.lost.failingLessons = true;
 
     expect(await handle(event("UserPromptSubmit", { prompt: "second" }), { fetch: server.fetch })).toBeNull();
@@ -126,6 +133,8 @@ describe("Claude Code hooks", () => {
     const reply = server.requests.at(-1)!.body;
     expect(reply.turn_id).toBe("turn-1");
     expect(reply.call.value.input.messages[0].content[0].text).toBe("second");
+    // The first turn's lessons were not added to this prompt.
+    expect(reply.execution ?? null).toBeNull();
   });
 
   it("records a session that could not start from the next prompt", async () => {

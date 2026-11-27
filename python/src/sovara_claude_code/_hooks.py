@@ -22,6 +22,8 @@ from sovara import (
     ConversationOutput,
     ErrorInfo,
     ErrorOutcome,
+    Execution,
+    LessonContext,
     LlmCall,
     Message,
     SuccessOutcome,
@@ -86,8 +88,7 @@ def _start_turn(session: str, prompt: str, http_client: httpx.Client | None) -> 
         return sovara.export_recording()
 
 
-def _lessons(handle: str, prompt: str, http_client: httpx.Client | None) -> Any:
-    # Retrieved, not applied: Claude Code does not show what reaches the model.
+def _lessons(handle: str, prompt: str, http_client: httpx.Client | None) -> LessonContext | None:
     with sovara.resume_recording(handle, http_client=http_client):
         return sovara.retrieve_lessons(prompt)
 
@@ -113,13 +114,19 @@ def user_prompt_submit(
         state = {**state, "session": _open(event, http_client)}
         turn = _start_turn(state["session"], prompt, http_client)
     # Saved before retrieving lessons, so later steps join this turn even if retrieval fails.
-    _state.save(session_id, {**state, "turn": turn, "prompt": prompt})
+    state = {**state, "turn": turn, "prompt": prompt, "lessons": None}
+    _state.save(session_id, state)
     try:
         lessons = _lessons(turn or state["session"], prompt, http_client) if prompt else None
     except sovara.RecordingError:
         lessons = None
     if lessons is None:
         return None
+    # Kept until Stop, which records them as part of the input of the turn's model step.
+    _state.save(
+        session_id,
+        {**state, "lessons": {"text": lessons.text, "retrieval_id": lessons.retrieval_id}},
+    )
     return json.dumps(
         {
             "hookSpecificOutput": {
@@ -131,11 +138,15 @@ def user_prompt_submit(
 
 
 def _record(
-    state: dict[str, Any], call: Any, outcome: Any, http_client: httpx.Client | None
+    state: dict[str, Any],
+    call: Any,
+    outcome: Any,
+    http_client: httpx.Client | None,
+    execution: Execution | None = None,
 ) -> None:
     handle = state.get("turn") or state["session"]
     with sovara.resume_recording(handle, http_client=http_client):
-        sovara.record_step(call, outcome)
+        sovara.record_step(call, outcome, execution=execution)
 
 
 def _tool_call(event: dict[str, Any]) -> ToolCall:
@@ -169,19 +180,35 @@ def post_tool_use_failure(
 
 
 def stop(event: dict[str, Any], http_client: httpx.Client | None = None) -> str | None:
-    """Record Claude's reply to the turn's prompt as a model step."""
-    state = _state.load(event["session_id"])
+    """Record Claude's reply to the turn's prompt as a model step, with the lessons it received."""
+    session_id = event["session_id"]
+    state = _state.load(session_id)
     reply = str(event.get("last_assistant_message") or "")
     if state is None or not reply or event.get("stop_hook_active"):
         return None
     prompt = str(state.get("prompt") or "")
+    messages = (_text_message("user", prompt),) if prompt else ()
     call = LlmCall(
         provider="anthropic",
-        input=ConversationInput(messages=(_text_message("user", prompt),) if prompt else ()),
+        input=ConversationInput(messages=messages),
         metadata={"source": "claude-code"},
     )
     outcome = SuccessOutcome(output=ConversationOutput(message=_text_message("assistant", reply)))
-    _record(state, call, outcome, http_client)
+    lessons = state.get("lessons")
+    # Claude Code added the lessons to the prompt. Reporting them as a user message after it, as
+    # the SDK expects, ties the retrieval to this step.
+    execution = (
+        Execution(
+            input=ConversationInput(messages=(*messages, _text_message("user", lessons["text"]))),
+            injected_retrieval_id=lessons["retrieval_id"],
+        )
+        if lessons
+        else None
+    )
+    _record(state, call, outcome, http_client, execution)
+    if lessons:
+        # A retrieval belongs to one step.
+        _state.save(session_id, {**state, "lessons": None})
     return None
 
 
