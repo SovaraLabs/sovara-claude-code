@@ -1,9 +1,9 @@
 /**
  * Per-session state shared by the hook processes of one Claude Code session.
  *
- * Each session has one JSON file holding its recording handles, which carry a write token: the
- * file is private (0600), written atomically, and never logged. The format is shared with the
- * Python integration (`sovara-claude-code`).
+ * Each session has one JSON file holding its recording handles, which carry a write token, and the
+ * current turn's prompt and lessons: the file is private (0600), written atomically, and never
+ * logged. The format is shared with the Python integration (`sovara-claude-code`).
  */
 import { mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -14,6 +14,8 @@ export type SessionState = {
   session: string;
   turn: string | null;
   prompt: string | null;
+  /** Lessons added to the current turn's prompt, recorded with its model step. */
+  lessons?: { text: string; retrieval_id: string } | null;
 };
 
 /** A session whose SessionEnd never ran (a crash) is forgotten after this long. */

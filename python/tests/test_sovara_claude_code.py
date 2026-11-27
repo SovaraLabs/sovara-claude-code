@@ -111,6 +111,7 @@ def test_a_session_is_recorded_with_lessons_tools_and_the_reply(server, tmp_path
         client,
     )
     handle(_event("Stop", last_assistant_message="Fixed it."), client)
+    handle(_event("Stop", last_assistant_message="Also done."), client)
     handle(_event("SessionEnd", reason="other"), client)
 
     assert json.loads(output or "")["hookSpecificOutput"]["additionalContext"] == (
@@ -123,15 +124,22 @@ def test_a_session_is_recorded_with_lessons_tools_and_the_reply(server, tmp_path
         "/steps/record",
         "/steps/record",
         "/steps/record",
+        "/steps/record",
         "/complete",
     ]
     opened = fake.requests[0][1]
     assert (opened["project_name"], opened["trace_id"]) == ("my-repo", "claude-code:s1")
-    tool, failed, reply = (body for path, body in fake.requests if path.endswith("/record"))
+    tool, failed, reply, later = (body for path, body in fake.requests if path.endswith("/record"))
     assert tool["call"]["value"]["name"] == "Bash" and tool["turn_id"] == "turn-1"
     assert failed["outcome"]["value"]["status"] == "error"
     assert reply["call"]["value"]["kind"] == "llm"
     assert reply["outcome"]["value"]["output"]["message"]["content"][0]["text"] == "Fixed it."
+    execution = reply["execution"]["value"]
+    assert execution["injected_retrieval_id"] == "retrieval-1"
+    sent = [message["content"][0]["text"] for message in execution["input"]["messages"]]
+    assert sent == ["Fix the build", "Run the tests first."]
+    # A retrieval belongs to one step; a later reply in the same turn records none.
+    assert later["execution"] is None
     assert list(tmp_path.glob("*.json")) == []
     assert TOKEN not in caplog.text
 
@@ -189,6 +197,7 @@ def test_a_passing_failure_does_not_open_a_second_recording(server, status):
 def test_a_failed_lesson_retrieval_still_starts_the_turn(server):
     fake, client = server
     handle(_event("SessionStart", source="startup"), client)
+    handle(_event("UserPromptSubmit", prompt="first"), client)
     fake.failing_lessons = True
 
     assert handle(_event("UserPromptSubmit", prompt="second"), client) is None
@@ -197,6 +206,8 @@ def test_a_failed_lesson_retrieval_still_starts_the_turn(server):
     reply = fake.requests[-1][1]
     assert reply["turn_id"] == "turn-1"
     assert reply["call"]["value"]["input"]["messages"][0]["content"][0]["text"] == "second"
+    # The first turn's lessons were not added to this prompt.
+    assert reply["execution"] is None
 
 
 def test_a_session_that_could_not_start_is_recorded_from_the_next_prompt(server):

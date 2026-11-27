@@ -17,6 +17,7 @@ import {
   SovaraConfigError,
   startTurn,
   type Call,
+  type Execution,
   type JsonObject,
   type Message,
   type Outcome,
@@ -79,7 +80,6 @@ function beginTurn(session: string, prompt: string, options: Options): Promise<s
 }
 
 function lessonsFor(handle: string, prompt: string, options: Options) {
-  // Retrieved, not applied: Claude Code does not show what reaches the model.
   return resumeRecording(handle, () => retrieveLessons(prompt), { fetch: options.fetch });
 }
 
@@ -104,7 +104,8 @@ async function userPromptSubmit(event: HookEvent & { session_id: string }, optio
     turn = await beginTurn(state.session, prompt, options);
   }
   // Saved before retrieving lessons, so later steps join this turn even if retrieval fails.
-  save(event.session_id, { ...state, turn, prompt });
+  state = { ...state, turn, prompt, lessons: null };
+  save(event.session_id, state);
   let lessons = null;
   if (prompt) {
     try {
@@ -114,13 +115,19 @@ async function userPromptSubmit(event: HookEvent & { session_id: string }, optio
     }
   }
   if (!lessons) return null;
+  // Kept until Stop, which records them as part of the input of the turn's model step.
+  save(event.session_id, { ...state, lessons: { text: lessons.text, retrieval_id: lessons.retrieval_id } });
   return JSON.stringify({
     hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: lessons.text },
   });
 }
 
-async function record(state: SessionState, call: Call, outcome: Outcome, options: Options): Promise<void> {
-  await resumeRecording(state.turn ?? state.session, () => recordStep(call, outcome), { fetch: options.fetch });
+async function record(
+  state: SessionState, call: Call, outcome: Outcome, options: Options, execution?: Execution,
+): Promise<void> {
+  await resumeRecording(state.turn ?? state.session, () => recordStep(call, outcome, { execution }), {
+    fetch: options.fetch,
+  });
 }
 
 function toolCall(event: HookEvent): Call {
@@ -151,13 +158,26 @@ async function stop(event: HookEvent & { session_id: string }, options: Options)
   const state = load(event.session_id);
   const reply = String(event.last_assistant_message ?? "");
   if (!state || !reply || event.stop_hook_active) return null;
+  const messages = state.prompt ? [textMessage("user", state.prompt)] : [];
   const call: Call = {
     kind: "llm",
     provider: "anthropic",
-    input: { format: "conversation", messages: state.prompt ? [textMessage("user", state.prompt)] : [] },
+    input: { format: "conversation", messages },
     metadata: { source: "claude-code" },
   };
-  await record(state, call, { status: "success", output: { message: textMessage("assistant", reply) } }, options);
+  const lessons = state.lessons;
+  // Claude Code added the lessons to the prompt. Reporting them as a user message after it, as
+  // the SDK expects, ties the retrieval to this step.
+  const execution: Execution | undefined = lessons
+    ? {
+      input: { format: "conversation", messages: [...messages, textMessage("user", lessons.text)] },
+      injected_retrieval_id: lessons.retrieval_id,
+    }
+    : undefined;
+  const outcome: Outcome = { status: "success", output: { message: textMessage("assistant", reply) } };
+  await record(state, call, outcome, options, execution);
+  // A retrieval belongs to one step.
+  if (lessons) save(event.session_id, { ...state, lessons: null });
   return null;
 }
 
